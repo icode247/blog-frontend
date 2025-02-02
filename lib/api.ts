@@ -5,11 +5,8 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1337";
 
 function getAuthHeaders() {
   let token;
-
-  // Check if we're in browser environment
   if (typeof window !== "undefined") {
     token = Cookies.get("token");
-    console.log("Client Token:", token);
   }
 
   return {
@@ -23,9 +20,6 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
     ...getAuthHeaders(),
     ...options.headers,
   };
-
-  console.log("Making request with headers:", headers);
-
   const response = await fetch(`${API_URL}${url}`, {
     ...options,
     headers,
@@ -36,7 +30,6 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
       throw new Error("Permission denied");
     }
     if (response.status === 401) {
-      // Only try to remove token if we're in browser
       if (typeof window !== "undefined") {
         Cookies.remove("token");
       }
