@@ -1,54 +1,50 @@
 "use client";
-import { BlogPost as BlogPostComponent } from "@/components/BlogPost";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { BlogPost, User } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import { BlogPost as BlogPostComponent } from "@/components/BlogPost";
 
-export default function BlogPostPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function BlogPostPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [post, setPost] = useState<BlogPost | null>(null);
-  const [subscription, setSubscription] = useState<User['subscription']>();
+  const [subscription, setSubscription] = useState<User["subscription"]>();
   const [loading, setLoading] = useState(true);
+  
+  // Extract the ID outside of useEffect to avoid the params warning
+  const postId = params.id;
 
   useEffect(() => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("token");
     if (!token) {
-      router.push(`/login?redirect=/blog/${params.id}`);
+      router.push(`/login?redirect=/blog/${postId}`);
       return;
     }
 
     // Fetch both post and subscription data
-    Promise.all([
-      api.getBlogPost(params.id),
-      api.getSubscription()
-    ])
+    Promise.all([api.getBlogPost(postId), api.getSubscription()])
       .then(([postResponse, subscriptionResponse]) => {
         setPost(postResponse.data);
         setSubscription(subscriptionResponse);
       })
       .catch((error) => {
-        if (error.message.includes('Session expired')) {
-          router.push(`/login?redirect=/blog/${params.id}`);
+        if (error.message.includes("Session expired")) {
+          router.push(`/login?redirect=/blog/${postId}`);
         }
       })
       .finally(() => setLoading(false));
-  }, [params.id, router]);
+  }, [postId, router]); // Using postId instead of params.id
 
   if (loading) return <div>Loading...</div>;
   if (!post || !subscription) return <div>Content not found</div>;
-
+  console.log(post);
+  
   return (
     <main className="container mx-auto px-4 py-8">
-      <BlogPostComponent 
-        post={post}
-        subscription={subscription}
-      />
+      <Suspense fallback={<div>Loading...</div>}>
+        <BlogPostComponent post={post} subscription={subscription} />
+      </Suspense>
     </main>
   );
 }

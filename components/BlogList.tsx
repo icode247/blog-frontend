@@ -17,7 +17,6 @@ export function BlogList() {
   }, []);
 
   if (loading) return <div>Loading...</div>;
-
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {posts.map((post) => (
