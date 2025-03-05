@@ -4,7 +4,6 @@ import { api } from "@/lib/api";
 import { BlogPost, User } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import { BlogPost as BlogPostComponent } from "@/components/BlogPost";
 
 export default function BlogPostPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -43,7 +42,6 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
   return (
     <main className="container mx-auto px-4 py-8">
       <Suspense fallback={<div>Loading...</div>}>
-        <BlogPostComponent post={post} subscription={subscription} />
       </Suspense>
     </main>
   );
